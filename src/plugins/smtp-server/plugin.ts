@@ -34,7 +34,7 @@ export class Plugin implements IPlugin {
   };
   init (features: PluginFeature): Promise<void> {
     const self = this;
-    return new Promise(() => {
+    return new Promise((resolve) => {
       let SMTP_SERVER: any = null;
       SMTP_SERVER = new SMTPServer({
         banner: features.getPluginConfig<ISMTPServerConfig>().banner || 'BetterCorp SMTP Server',
@@ -153,6 +153,7 @@ export class Plugin implements IPlugin {
 
       SMTP_SERVER.listen(features.getPluginConfig<ISMTPServerConfig>().port || 25);
       features.log.info(`Server started on port ${features.getPluginConfig<ISMTPServerConfig>().port || 25}`);
+      resolve();
     });
   }
 }
