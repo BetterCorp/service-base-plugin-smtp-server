@@ -1,5 +1,5 @@
 import { IPlugin, PluginFeature } from '@bettercorp/service-base/lib/ILib';
-import { ISMTPServerConfig } from './config';
+import { ISMTPServerConfig, ISMTPServerEvents } from './config';
 
 const SMTPServer = require("smtp-server").SMTPServer;
 const simpleParser = require('mailparser').simpleParser;
@@ -13,17 +13,6 @@ export class Plugin implements IPlugin {
       return newData.substring(0, 255);
     return newData;
   };
-  // TODO: Fix SPF Validation
-  private SPFValidate (email: string, clientIp: string): Promise<any> {
-    return new Promise((resolve) => {
-      resolve({
-        result: SPF.Neutral
-      });
-    });
-    /*let cleanEmail = CleanData(email);
-    let emailData = cleanEmail.split('@');
-    return new SPF.SPF(emailData[1], cleanEmail, PLUGIN_FEATURES.config['plugin-smtp'].spfOptions || {}).check(clientIp);*/
-  };
   private streamToString (stream: any) {
     const chunks: any = [];
     return new Promise((resolve, reject) => {
@@ -33,6 +22,17 @@ export class Plugin implements IPlugin {
     });
   };
   init (features: PluginFeature): Promise<void> {
+    // TODO: Fix SPF Validation
+    const SPFValidate = (email: string, clientIp: string): Promise<any> => {
+      /*return new Promise((resolve) => {
+        resolve({
+          result: SPF.Neutral
+        });
+      });*/
+      let cleanEmail = this.CleanData(email);
+      let emailData = cleanEmail.split('@');
+      return new SPF.SPF(emailData[1], cleanEmail, features.getPluginConfig<ISMTPServerConfig>().spfOptions || {}).check(clientIp);
+    };
     const self = this;
     return new Promise((resolve) => {
       let SMTP_SERVER: any = null;
@@ -40,21 +40,40 @@ export class Plugin implements IPlugin {
         banner: features.getPluginConfig<ISMTPServerConfig>().banner || 'BetterCorp SMTP Server',
         onAuth (auth: any, session: any, callback: any) {
           features.log.info('Auth Request');
-          features.log.info(auth);
+          features.log.debug(auth);
+          if (features.getPluginConfig<ISMTPServerConfig>().events.onAuth === true)
+            return features.emitEventAndReturn(null, ISMTPServerEvents.onAuth, {
+              auth: auth,
+              session: session
+            }).then(x => callback(null, x)).catch(x => callback(x || new Error('Unknown Error')));
           return callback(new Error("Invalid username or password"));
         },
         onConnect (session: any, callback: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress}`);
-          callback();
+          if (features.getPluginConfig<ISMTPServerConfig>().events.onConnect === true)
+            return features.emitEventAndReturn(null, ISMTPServerEvents.onConnect, {
+              session: session
+            }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
+          return callback();
         },
         onClose (session: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress} - CLOSED`);
+          if (features.getPluginConfig<ISMTPServerConfig>().events.onClose === true)
+            return features.emitEvent(null, ISMTPServerEvents.onClose, {
+              session: session
+            });
         },
         onMailFrom (address: any, session: any, callback: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress} {FROM} ${address.address}`);
           session._sender = address;
+          if (features.getPluginConfig<ISMTPServerConfig>().events.onMailFrom === true)
+            return features.emitEventAndReturn(null, ISMTPServerEvents.onMailFrom, {
+              address: address,
+              session: session,
+              SPFValidate: SPFValidate
+            }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
 
-          self.SPFValidate(address.address, session.remoteAddress).then(result => {
+          return SPFValidate(address.address, session.remoteAddress).then(result => {
             if (result.result === SPF.Pass || result.result === SPF.Neutral) {
               features.log.info(`Received SMTP request from ${session.remoteAddress} {FROM} ${address.address} - SPF PASS: ${result.result}`);
               return callback();
@@ -74,6 +93,11 @@ export class Plugin implements IPlugin {
         onRcptTo (address: any, session: any, callback: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress} {TO} ${address.address}`);
           session._receiver = address;
+          if (features.getPluginConfig<ISMTPServerConfig>().events.onRcptTo === true)
+            return features.emitEventAndReturn(null, ISMTPServerEvents.onRcptTo, {
+              address: address,
+              session: session
+            }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
           //if (features.runningInDebug)
           //  return callback();
 
@@ -149,6 +173,7 @@ export class Plugin implements IPlugin {
 
       SMTP_SERVER.on("error", (err: any) => {
         features.log.info("Error %s", err.message);
+        features.emitEvent(null, ISMTPServerEvents.onError, err);
       });
 
       SMTP_SERVER.listen(features.getPluginConfig<ISMTPServerConfig>().port || 25);

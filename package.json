@@ -16,13 +16,13 @@
     "installer.js"
   ],
   "main": "lib/index.js",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "dependencies": {
-    "@bettercorp/service-base": "^3.0.9",
-    "@bettercorp/tools": "^1.0.5",
-    "@types/node": "^14.11.2",
-    "mailparser": "^3.0.0",
-    "smtp-server": "^3.7.0",
+    "@bettercorp/service-base": "^3.0.21",
+    "@bettercorp/tools": "^1.0.6",
+    "@types/node": "^14.14.25",
+    "mailparser": "^3.0.1",
+    "smtp-server": "^3.8.0",
     "spf-check": "^0.4.3"
   },
   "devDependencies": {
