@@ -42,7 +42,7 @@ export class Plugin implements IPlugin {
           features.log.info('Auth Request');
           features.log.debug(auth);
           if (features.getPluginConfig<ISMTPServerConfig>().events.onAuth === true)
-            return features.emitEventAndReturn(null, ISMTPServerEvents.onAuth, {
+            return features.emitEventAndReturn(features.pluginName, ISMTPServerEvents.onAuth, {
               auth: auth,
               session: session
             }).then(x => callback(null, x)).catch(x => callback(x || new Error('Unknown Error')));
@@ -51,7 +51,7 @@ export class Plugin implements IPlugin {
         onConnect (session: any, callback: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress}`);
           if (features.getPluginConfig<ISMTPServerConfig>().events.onConnect === true)
-            return features.emitEventAndReturn(null, ISMTPServerEvents.onConnect, {
+            return features.emitEventAndReturn(features.pluginName, ISMTPServerEvents.onConnect, {
               session: session
             }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
           return callback();
@@ -59,7 +59,7 @@ export class Plugin implements IPlugin {
         onClose (session: any) {
           features.log.info(`Received SMTP request from ${session.remoteAddress} - CLOSED`);
           if (features.getPluginConfig<ISMTPServerConfig>().events.onClose === true)
-            return features.emitEvent(null, ISMTPServerEvents.onClose, {
+            return features.emitEvent(features.pluginName, ISMTPServerEvents.onClose, {
               session: session
             });
         },
@@ -67,7 +67,7 @@ export class Plugin implements IPlugin {
           features.log.info(`Received SMTP request from ${session.remoteAddress} {FROM} ${address.address}`);
           session._sender = address;
           if (features.getPluginConfig<ISMTPServerConfig>().events.onMailFrom === true)
-            return features.emitEventAndReturn(null, ISMTPServerEvents.onMailFrom, {
+            return features.emitEventAndReturn(features.pluginName, ISMTPServerEvents.onMailFrom, {
               address: address,
               session: session,
               SPFValidate: SPFValidate
@@ -94,7 +94,7 @@ export class Plugin implements IPlugin {
           features.log.info(`Received SMTP request from ${session.remoteAddress} {TO} ${address.address}`);
           session._receiver = address;
           if (features.getPluginConfig<ISMTPServerConfig>().events.onRcptTo === true)
-            return features.emitEventAndReturn(null, ISMTPServerEvents.onRcptTo, {
+            return features.emitEventAndReturn(features.pluginName, ISMTPServerEvents.onRcptTo, {
               address: address,
               session: session
             }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
@@ -126,12 +126,12 @@ export class Plugin implements IPlugin {
             }
             simpleParser(x)
               .then((parsed: any) => {
-                features.emitEvent(null, `email`, {
+                features.emitEvent(features.pluginName, `email`, {
                   receiver: session._receiver.address,
                   sender: session._sender.address,
                   body: parsed
                 });
-                features.emitEvent(null, `email-${session._receiver.address}`, {
+                features.emitEvent(features.pluginName, `email-${session._receiver.address}`, {
                   receiver: session._receiver.address,
                   sender: session._sender.address,
                   body: parsed
@@ -173,7 +173,7 @@ export class Plugin implements IPlugin {
 
       SMTP_SERVER.on("error", (err: any) => {
         features.log.info("Error %s", err.message);
-        features.emitEvent(null, ISMTPServerEvents.onError, err);
+        features.emitEvent(features.pluginName, ISMTPServerEvents.onError, err);
       });
 
       SMTP_SERVER.listen(features.getPluginConfig<ISMTPServerConfig>().port || 25);
