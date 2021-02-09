@@ -9,7 +9,7 @@
     "start": "node lib/index.js",
     "build": "tsc",
     "deploy": "npm publish",
-    "postinstall": "node ../service-base/install-plugin.js"
+    "xpostinstall": "node ../service-base/install-plugin.js"
   },
   "files": [
     "lib/**/*",
