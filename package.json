@@ -9,7 +9,8 @@
     "start": "node lib/index.js",
     "build": "tsc",
     "deploy": "npm publish",
-    "xpostinstall": "node ../service-base/install-plugin.js"
+    "xpostinstall": "node ../service-base/install-plugin.js",
+    "version": "node ./node_modules/@bettercorp/service-base/build/version.js $0"
   },
   "files": [
     "lib/**/*",
@@ -18,16 +19,16 @@
   "main": "lib/index.js",
   "version": "1.0.7",
   "dependencies": {
-    "@bettercorp/service-base": "^3.0.21",
-    "@bettercorp/tools": "^1.0.6",
-    "@types/node": "^14.14.25",
-    "mailparser": "^3.0.1",
-    "smtp-server": "^3.8.0",
+    "@bettercorp/service-base": "^4.1.20210611181711",
+    "@bettercorp/tools": "^1.1.20210611181403",
+    "@types/node": "^14.17.5",
+    "mailparser": "^3.2.0",
+    "smtp-server": "^3.9.0",
     "spf-check": "^0.4.3"
   },
   "devDependencies": {
     "ts-node": "^8.0.2",
     "tslint": "^5.12.0",
-    "typescript": "^3.2.2"
+    "typescript": "^3.9.10"
   }
 }

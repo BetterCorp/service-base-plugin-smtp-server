@@ -104,7 +104,9 @@ export class Plugin implements IPlugin {
           let cleanEmail = self.CleanData(address.address);
           let emailData = cleanEmail.split('@');
           for (let mailHost of (features.getPluginConfig<ISMTPServerConfig>() || {}).domains || []) {
-            if (mailHost === emailData[1].toLowerCase()) {
+            let debugHost = emailData[1].toLowerCase();
+            features.log.debug(`Received SMTP request from ${session.remoteAddress} {TO} ${address.address} - [${debugHost}] ==? [${mailHost}]`);
+            if (mailHost === debugHost) {
               return callback();
             }
           }
