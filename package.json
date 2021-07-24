@@ -19,9 +19,9 @@
   "main": "lib/index.js",
   "version": "1.0.7",
   "dependencies": {
-    "@bettercorp/service-base": "^4.1.20210611181711",
+    "@bettercorp/service-base": "^4.1.20210621171032",
     "@bettercorp/tools": "^1.1.20210611181403",
-    "@types/node": "^14.17.5",
+    "@types/node": "^14.17.6",
     "mailparser": "^3.2.0",
     "smtp-server": "^3.9.0",
     "spf-check": "^0.4.3"
