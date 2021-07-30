@@ -5,21 +5,16 @@
     "url": "https://gitlab.com/BetterCorp/public/service-base-plugin-smtp-server"
   },
   "scripts": {
-    "dev": "nodemon -L --watch src/**/*.ts --watch plugins/**/*.ts --exec ts-node src/index.ts",
-    "start": "node lib/index.js",
     "build": "tsc",
-    "deploy": "npm publish",
-    "xpostinstall": "node ../service-base/install-plugin.js",
     "version": "node ./node_modules/@bettercorp/service-base/build/version.js $0"
   },
   "files": [
-    "lib/**/*",
-    "installer.js"
+    "lib/**/*"
   ],
   "main": "lib/index.js",
   "version": "1.0.7",
   "dependencies": {
-    "@bettercorp/service-base": "^4.1.20210621171032",
+    "@bettercorp/service-base": "^5.0.20210630172432-featurev5",
     "@bettercorp/tools": "^1.1.20210611181403",
     "@types/node": "^14.17.6",
     "mailparser": "^3.2.0",

@@ -17,12 +17,14 @@ export interface ISMTPServerConfig {
   spfOptions: any;
 }
 export enum ISMTPServerEvents {
-  onAuth = 'on-auth',
-  onConnect = 'on-connect',
-  onClose = 'on-close',
-  onMailFrom = 'on-mail-from',
-  onRcptTo = 'on-recpt-to',
-  onError = 'on-error',
-  onEmail = 'email',
-  _onEmailSpecific = 'email-'
+  onAuth = 'onAuth',
+  onConnect = 'onConnect',
+  onClose = 'onClose',
+  onMailFrom = 'onMailFrom',
+  onRcptTo = 'onRecptTo',
+  onError = 'onError',
+  onEmail = 'email'
+}
+export function getEmailSpecific(emailAddress: string) {
+  return `email-${emailAddress}`;
 }
