@@ -52,17 +52,17 @@ export class smtpServer extends CPluginClient<ISMTPServerConfig> {
 export class Plugin extends CPlugin<ISMTPServerConfig> {
   init(): Promise<void> {
     const self = this;
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       let SMTP_SERVER: any = null;
       SMTP_SERVER = new SMTPServer({
-        banner: self.getPluginConfig().banner || 'BetterCorp SMTP Server',
+        banner: (await self.getPluginConfig()).banner || 'BetterCorp SMTP Server',
         onAuth: self.onAuth,
         onConnect: self.onConnect,
         onClose: self.onClose,
         onMailFrom: self.onMailFrom,
         onRcptTo: self.onRcptTo,
         onData: self.onData,
-        ...(self.getPluginConfig().serverOptions || {})
+        ...((await self.getPluginConfig()).serverOptions || {})
       });
 
       SMTP_SERVER.on("error", (err: any) => {
@@ -70,8 +70,8 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
         self.emitEvent(null, ISMTPServerEvents.onError, err);
       });
 
-      SMTP_SERVER.listen(self.getPluginConfig().port || 2525);
-      self.log.info(`Server started on port ${ self.getPluginConfig().port || 2525 }`);
+      SMTP_SERVER.listen((await self.getPluginConfig()).port || 2525);
+      self.log.info(`Server started on port ${ (await self.getPluginConfig()).port || 2525 }`);
       resolve();
     });
   }
@@ -93,7 +93,7 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
   };
 
   // TODO: Fix SPF Validation
-  SPFValidate(email: string, clientIp: string): Promise<any> {
+  async SPFValidate(email: string, clientIp: string): Promise<any> {
     /*return new Promise((resolve) => {
       resolve({
         result: SPF.Neutral
@@ -101,13 +101,13 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     });*/
     let cleanEmail = this.CleanData(email);
     let emailData = cleanEmail.split('@');
-    return new SPF.SPF(emailData[1], cleanEmail, this.getPluginConfig().spfOptions || {}).check(clientIp);
+    return new SPF.SPF(emailData[1], cleanEmail, (await this.getPluginConfig()).spfOptions || {}).check(clientIp);
   }
 
-  onAuth(auth: any, session: any, callback: any) {
+  async onAuth(auth: any, session: any, callback: any) {
     this.log.info('Auth Request');
     this.log.debug(auth);
-    if (this.getPluginConfig().events.onAuth === true) {
+    if ((await this.getPluginConfig()).events.onAuth === true) {
       return this.emitEventAndReturn(null, ISMTPServerEvents.onAuth, {
         auth: auth,
         session: session
@@ -116,9 +116,9 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     return callback(new Error("Invalid username or password"));
   }
 
-  onConnect(session: any, callback: any) {
+  async onConnect(session: any, callback: any) {
     this.log.info(`Received SMTP request from ${ session.remoteAddress }`);
-    if (this.getPluginConfig().events.onConnect === true) {
+    if ((await this.getPluginConfig()).events.onConnect === true) {
       return this.emitEventAndReturn(null, ISMTPServerEvents.onConnect, {
         session: session
       }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
@@ -126,19 +126,19 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     return callback();
   }
 
-  onClose(session: any) {
+  async onClose(session: any) {
     this.log.info(`Received SMTP request from ${ session.remoteAddress } - CLOSED`);
-    if (this.getPluginConfig().events.onClose === true)
+    if ((await this.getPluginConfig()).events.onClose === true)
       return this.emitEvent(null, ISMTPServerEvents.onClose, {
         session: session
       });
   }
 
-  onMailFrom(address: any, session: any, callback: any) {
+  async onMailFrom(address: any, session: any, callback: any) {
     const self = this;
     this.log.info(`Received SMTP request from ${ session.remoteAddress } {FROM} ${ address.address }`);
     session._sender = address;
-    if (this.getPluginConfig().events.onMailFrom === true)
+    if ((await this.getPluginConfig()).events.onMailFrom === true)
       return this.emitEventAndReturn(null, ISMTPServerEvents.onMailFrom, {
         address: address,
         session: session
@@ -162,10 +162,10 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     });
   }
 
-  onRcptTo(address: any, session: any, callback: any) {
+  async onRcptTo(address: any, session: any, callback: any) {
     this.log.info(`Received SMTP request from ${ session.remoteAddress } {TO} ${ address.address }`);
     session._receiver = address;
-    if (this.getPluginConfig().events.onRcptTo === true)
+    if ((await this.getPluginConfig()).events.onRcptTo === true)
       return this.emitEventAndReturn(null, ISMTPServerEvents.onRcptTo, {
         address: address,
         session: session
@@ -175,7 +175,7 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
 
     let cleanEmail = this.CleanData(address.address);
     let emailData = cleanEmail.split('@');
-    for (let mailHost of (this.getPluginConfig() || {}).domains || []) {
+    for (let mailHost of ((await this.getPluginConfig()) || {}).domains || []) {
       let debugHost = emailData[1].toLowerCase();
       this.log.debug(`Received SMTP request from ${ session.remoteAddress } {TO} ${ address.address } - [${ debugHost }] ==? [${ mailHost }]`);
       if (mailHost === debugHost) {
@@ -196,7 +196,7 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     this.log.info(`Received SMTP request from ${ session.remoteAddress } {BODY}`);
     //stream.pipe(process.stdout); // print message to console
     let dataOkay = false;
-    this.streamToString(stream).then(x => {
+    this.streamToString(stream).then(async x => {
       if (!dataOkay) {
         return self.log.info(`Received SMTP request from ${ session.remoteAddress } {BODY} - TOO LARGE, NO PASS`);
       }
