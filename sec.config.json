@@ -1,0 +1,1 @@
+{"identity":"durmr01","debug":true,"deploymentProfiles":{"default":{"smtp-server":{"mappedName":"smtp-server","enabled":false}}},"plugins":{"smtp-server":{}}}

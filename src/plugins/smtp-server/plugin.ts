@@ -1,4 +1,4 @@
-import { CPlugin, CPluginClient, } from '@bettercorp/service-base/lib/ILib';
+import { CPlugin, CPluginClient, } from '@bettercorp/service-base/lib/interfaces/plugins';
 import { getEmailSpecific, ISMTPServerConfig, ISMTPServerEvents } from './config';
 
 const SMTPServer = require("smtp-server").SMTPServer;
@@ -23,29 +23,29 @@ export type PromiseResolve<TData = any, TReturn = void> = (data: TData) => TRetu
 export class smtpServer extends CPluginClient<ISMTPServerConfig> {
   public readonly _pluginName: string = "smtp-server";
 
-  onError(listener: (err: any) => void) {
-    this.onEvent<any>(ISMTPServerEvents.onError, listener);
+  async onError(listener: (err: any) => void) {
+    await this.onEvent<any>(ISMTPServerEvents.onError, listener);
   }
-  onAuth(listener: (resolve: PromiseResolve<any, void>, reject: PromiseResolve<any, void>, request: ISMTPServerOnAuthRequest) => void) {
-    this.onReturnableEvent<ISMTPServerOnAuthRequest>(ISMTPServerEvents.onAuth, listener as any);
+  async onAuth(listener: {(request?: ISMTPServerOnAuthRequest): Promise<void>}) {
+    await this.onReturnableEvent<ISMTPServerOnAuthRequest>(ISMTPServerEvents.onAuth, listener);
   }
-  onConnect(listener: (resolve: PromiseResolve<any, void>, reject: PromiseResolve<any, void>, request: ISMTPServerOnRequest) => void) {
-    this.onReturnableEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onConnect, listener as any);
+  async onConnect(listener: {(request?: ISMTPServerOnRequest): Promise<void>}) {
+    await this.onReturnableEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onConnect, listener);
   }
-  onClose(listener: (request: ISMTPServerOnRequest) => void) {
-    this.onEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onClose, listener);
+  async onClose(listener: (request: ISMTPServerOnRequest) => void) {
+    await this.onEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onClose, listener);
   }
-  onEmail(listener: (request: ISMTPServerOnMailRequest) => void) {
-    this.onEvent<ISMTPServerOnMailRequest>(ISMTPServerEvents.onEmail, listener);
+  async onEmail(listener: (request: ISMTPServerOnMailRequest) => void) {
+    await this.onEvent<ISMTPServerOnMailRequest>(ISMTPServerEvents.onEmail, listener);
   }
-  onEmailSpecific(emailAddress: string, listener: (request: ISMTPServerOnMailRequest) => void) {
-    this.onEvent<ISMTPServerOnMailRequest>(getEmailSpecific(emailAddress), listener);
+  async onEmailSpecific(emailAddress: string, listener: (request: ISMTPServerOnMailRequest) => void) {
+    await this.onEvent<ISMTPServerOnMailRequest>(getEmailSpecific(emailAddress), listener);
   }
-  onMailFrom(listener: (resolve: PromiseResolve<any, void>, reject: PromiseResolve<any, void>, request: ISMTPServerOnMailFromRequest) => void) {
-    this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onMailFrom, listener as any);
+  async onMailFrom(listener: {(request?: ISMTPServerOnMailFromRequest): Promise<void>}) {
+    await this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onMailFrom, listener);
   }
-  onRcptTo(listener: (resolve: PromiseResolve<any, void>, reject: PromiseResolve<any, void>, request: ISMTPServerOnMailFromRequest) => void) {
-    this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onRcptTo, listener as any);
+  async onRcptTo(listener: {(request?: ISMTPServerOnMailFromRequest): Promise<void>}) {
+    await this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onRcptTo, listener);
   }
 }
 
@@ -92,13 +92,7 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     });
   };
 
-  // TODO: Fix SPF Validation
   async SPFValidate(email: string, clientIp: string): Promise<any> {
-    /*return new Promise((resolve) => {
-      resolve({
-        result: SPF.Neutral
-      });
-    });*/
     let cleanEmail = this.CleanData(email);
     let emailData = cleanEmail.split('@');
     return new SPF.SPF(emailData[1], cleanEmail, (await this.getPluginConfig()).spfOptions || {}).check(clientIp);
