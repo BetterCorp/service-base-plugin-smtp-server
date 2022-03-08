@@ -28,21 +28,39 @@ export class Plugin extends CPlugin<MyPluginConfig> {
       self.nodeMailer = createTransport((await self.getPluginConfig()).transport, (await self.getPluginConfig()).defaults);
 
       self.onEvent<Mail.Options>(null, 'send-email', async (data) => {
-        await self.nodeMailer.sendMail(data);
+        try {
+          self.log.debug(`SENDMAIL: ${ data.to }/${ data.cc }/${ data.bcc }:${ data.subject }`);
+          await self.nodeMailer.sendMail(data);
+          self.log.info(`SENDMAIL: ${ data.to }/${ data.cc }/${ data.bcc }:${ data.subject } - OK`);
+        } catch (exc) {
+          self.log.error(`SENDMAIL: ${ data.to }/${ data.cc }/${ data.bcc }:${ data.subject } - ERROR`);
+          self.log.error(exc);
+        }
       });
       self.onEvent<IMailTemplateRequest>(null, 'send-email-template', async (data) => {
         let mailOpts = data.mail;
-        
-        if (!Tools.isString(mailOpts.html)) {
-          let hbHtmlTemplate = handleBarCompile(mailOpts.html);
-          mailOpts.html = hbHtmlTemplate(data.data);
-        }
-        if (!Tools.isString(mailOpts.text)) {
-          let hbTextTemplate = handleBarCompile(mailOpts.text);
-          mailOpts.text = hbTextTemplate(data.data);
-        }
+        try {
+          self.log.debug(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject }`);
 
-        await self.nodeMailer.sendMail(mailOpts);
+          if (!Tools.isString(mailOpts.html)) {
+            self.log.debug(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - TMP HTML`);
+            let hbHtmlTemplate = handleBarCompile(mailOpts.html);
+            mailOpts.html = hbHtmlTemplate(data.data);
+            self.log.debug(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - TMP HTML - OK`);
+          }
+          if (!Tools.isString(mailOpts.text)) {
+            self.log.debug(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - TMP TEXT`);
+            let hbTextTemplate = handleBarCompile(mailOpts.text);
+            mailOpts.text = hbTextTemplate(data.data);
+            self.log.debug(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - TMP TEXT - OK`);
+          }
+
+          await self.nodeMailer.sendMail(mailOpts);
+          self.log.info(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - OK`);
+        } catch (exc) {
+          self.log.error(`SENDMAIL-TEMPLATE: ${ mailOpts.to }/${ mailOpts.cc }/${ mailOpts.bcc }:${ mailOpts.subject } - ERROR`);
+          self.log.error(exc);
+        }
       });
       resolve();
     });
