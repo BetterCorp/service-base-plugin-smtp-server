@@ -5,3 +5,4 @@ node_modules
 /_exports
 /junit.xml
 /test-file-*
+/sec.config.json

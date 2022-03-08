@@ -26,10 +26,10 @@ export class smtpServer extends CPluginClient<ISMTPServerConfig> {
   async onError(listener: (err: any) => void) {
     await this.onEvent<any>(ISMTPServerEvents.onError, listener);
   }
-  async onAuth(listener: {(request?: ISMTPServerOnAuthRequest): Promise<void>}) {
+  async onAuth(listener: { (request?: ISMTPServerOnAuthRequest): Promise<void>; }) {
     await this.onReturnableEvent<ISMTPServerOnAuthRequest>(ISMTPServerEvents.onAuth, listener);
   }
-  async onConnect(listener: {(request?: ISMTPServerOnRequest): Promise<void>}) {
+  async onConnect(listener: { (request?: ISMTPServerOnRequest): Promise<void>; }) {
     await this.onReturnableEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onConnect, listener);
   }
   async onClose(listener: (request: ISMTPServerOnRequest) => void) {
@@ -41,10 +41,10 @@ export class smtpServer extends CPluginClient<ISMTPServerConfig> {
   async onEmailSpecific(emailAddress: string, listener: (request: ISMTPServerOnMailRequest) => void) {
     await this.onEvent<ISMTPServerOnMailRequest>(getEmailSpecific(emailAddress), listener);
   }
-  async onMailFrom(listener: {(request?: ISMTPServerOnMailFromRequest): Promise<void>}) {
+  async onMailFrom(listener: { (request?: ISMTPServerOnMailFromRequest): Promise<void>; }) {
     await this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onMailFrom, listener);
   }
-  async onRcptTo(listener: {(request?: ISMTPServerOnMailFromRequest): Promise<void>}) {
+  async onRcptTo(listener: { (request?: ISMTPServerOnMailFromRequest): Promise<void>; }) {
     await this.onReturnableEvent<ISMTPServerOnMailFromRequest>(ISMTPServerEvents.onRcptTo, listener);
   }
 }
@@ -55,7 +55,7 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
     return new Promise(async (resolve) => {
       let SMTP_SERVER: any = null;
       SMTP_SERVER = new SMTPServer({
-        banner: (await self.getPluginConfig()).banner || 'BetterCorp SMTP Server',
+        banner: (await self.getPluginConfig()).banner || 'Better SMTP Server',
         onAuth: self.onAuth,
         onConnect: self.onConnect,
         onClose: self.onClose,
@@ -139,8 +139,12 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
       }).then(x => callback()).catch(x => callback(x || new Error('Unknown Error')));
 
     return this.SPFValidate(address.address, session.remoteAddress).then(result => {
-      if (result.result === SPF.Pass || result.result === SPF.Neutral) {
+      if (result.result === SPF.Pass) {
         self.log.info(`Received SMTP request from ${ session.remoteAddress } {FROM} ${ address.address } - SPF PASS: ${ result.result }`);
+        return callback();
+      }
+      if (result.result === SPF.Neutral) {
+        self.log.info(`Received SMTP request from ${ session.remoteAddress } {FROM} ${ address.address } - SPF NEUTRAL: ${ result.result }`);
         return callback();
       }
       self.log.error(`Received SMTP request from ${ session.remoteAddress } {FROM} ${ address.address } - SPF FAILED: ${ result.result }`);
