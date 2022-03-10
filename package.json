@@ -12,7 +12,8 @@
     "version": "node ./node_modules/@bettercorp/service-base/build/version-bcorp.js $0"
   },
   "files": [
-    "lib/**/*"
+    "lib/**/*",
+    "html-templates/**/*"
   ],
   "main": "lib/index.js",
   "version": "2.0.0",

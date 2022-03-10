@@ -4,6 +4,7 @@ import SendmailTransport = require('nodemailer/lib/sendmail-transport');
 export interface MyPluginConfig {
   transport: SendmailTransport | SendmailTransport.Options;
   defaults?: SendmailTransport.Options;
+  //templatesPath: string;
 }
 
 export interface IMailTemplateRequest {
@@ -17,7 +18,8 @@ export default (pluginName: string, existingPluginConfig: any): MyPluginConfig =
       sendmail: true,
       newline: 'unix',
       path: '/usr/sbin/sendmail'
-    }
+    },
+    //templatesPath: require('path').join(process.cwd(), './node_modules/@bettercorp/service-base-plugin-smtp-server/content/html-templates')
   };
   return newConfig;
 };

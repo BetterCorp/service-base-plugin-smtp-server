@@ -8,11 +8,8 @@ export enum MailgunRegion {
   US = 'US',
   EU = 'EU',
 }
-export interface CreateMail {
+export interface CreateSMail {
   to: Array<string>;
-  html: string;
-  text: string;
-  subject: string;
   mime?: string;
   attachment?: any;
   tag?: string;
@@ -24,6 +21,11 @@ export interface CreateMail {
   trackOpens?: boolean;
   headers?: Array<IDictionary<string>>;
   vars?: Array<IDictionary<string>>;
+}
+export interface CreateMail extends CreateSMail {
+  html: string;
+  text: string;
+  subject: string;
 }
 export class Mailgun {
   private getAPIUrlFromRegion(region: MailgunRegion): string {
@@ -62,17 +64,24 @@ export class Mailgun {
         'o:tracking-opens': data.trackOpens !== true ? 'no' : 'yes',
       };
       self.mailgunClient.messages.create(domain, sendMailData).then(resolve).catch(reject);
-    })
+    });
   }
 }
 
-export interface IMailTemplateRequest {
-  mail: MailGunRequest;
+export interface IMailTemplateRequest<Passthrough, Request = MailGunRequest<Passthrough>> {
+  mail: Request;
   data: any;
 }
 
-export interface MailGunRequest {
+export interface MailGunRequest<Passthrough> {
   domain: string;
   apiKey: string;
-  data: CreateMail;
+  data: Passthrough;
+}
+
+export interface MailGunSavedMailRequest<Passthrough> {
+  templateId: string;
+  domain: string;
+  apiKey: string;
+  data: Passthrough;
 }
