@@ -10,7 +10,8 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true
   },
   "linterOptions": {
     "exclude": [
