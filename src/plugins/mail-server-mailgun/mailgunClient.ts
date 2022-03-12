@@ -10,6 +10,7 @@ export enum MailgunRegion {
 }
 export interface CreateSMail {
   to: Array<string>;
+  from: string;
   mime?: string;
   attachment?: any;
   tag?: string;
@@ -50,6 +51,7 @@ export class Mailgun {
     const self = this;
     return new Promise((resolve, reject) => {
       let sendMailData = {
+        from: data.from,
         to: data.to,
         html: data.html,
         text: data.text,

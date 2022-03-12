@@ -167,15 +167,15 @@ export class Plugin extends CPlugin<MyPluginConfig> {
       if (Tools.isNullOrUndefined((await self.getPluginConfig()).region)) {
         self.log.warn('Running regionless - will respond to requests for all regions!');
         for (let region of Tools.enumKeys(MailgunRegion)) {
-          self.onEvent<MailGunRequest<CreateMail>>(null, `send-email-${ region }`, async (data) => sendMail(MailgunRegion[region], data));
-          self.onEvent<IMailTemplateRequest<CreateMail>>(null, `send-email-template-${ region }`, async (data) => sendMailTemplate(MailgunRegion[region], data));
-          self.onEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(null, `send-saved-email-template-${ region }`, async (data) => sendSavedMailTemplate(MailgunRegion[region], data));
+          self.onEvent<MailGunRequest<CreateMail>>(null, `send-email-${ region }`, async (data) => await sendMail(MailgunRegion[region], data));
+          self.onEvent<IMailTemplateRequest<CreateMail>>(null, `send-email-template-${ region }`, async (data) => await sendMailTemplate(MailgunRegion[region], data));
+          self.onEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(null, `send-saved-email-template-${ region }`, async (data) => await sendSavedMailTemplate(MailgunRegion[region], data));
         }
       } else {
         self.log.warn(`Running regionlocked - will respond to requests for ${ (await self.getPluginConfig()).region } specific region requests`);
         self.onEvent<MailGunRequest<CreateMail>>(null, `send-email-${ (await self.getPluginConfig()).region }`, async (data) => sendMail((await self.getPluginConfig()).region!, data));
-        self.onEvent<IMailTemplateRequest<CreateMail>>(null, `send-email-template-${ (await self.getPluginConfig()).region }`, async (data) => sendMailTemplate((await self.getPluginConfig()).region!, data));
-        self.onEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(null, `send-saved-email-template-${ (await self.getPluginConfig()).region }`, async (data) => sendSavedMailTemplate((await self.getPluginConfig()).region!, data));
+        self.onEvent<IMailTemplateRequest<CreateMail>>(null, `send-email-template-${ (await self.getPluginConfig()).region }`, async (data) => await sendMailTemplate((await self.getPluginConfig()).region!, data));
+        self.onEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(null, `send-saved-email-template-${ (await self.getPluginConfig()).region }`, async (data) => await sendSavedMailTemplate((await self.getPluginConfig()).region!, data));
       }
       resolve();
     });
