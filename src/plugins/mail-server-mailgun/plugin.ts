@@ -21,7 +21,7 @@ export class mailgun extends CPluginClient<MyPluginConfig> {
       domain = mailgunDefaults!.domain;
       apiKey = mailgunDefaults!.apiKey;
     }
-    this.refPlugin.emitEvent<MailGunRequest<CreateMail>>(null, `send-email-${ region }`, {
+    this.emitEvent<MailGunRequest<CreateMail>>(`send-email-${ region }`, {
       domain: domain!,
       apiKey: apiKey!,
       data: mail
@@ -39,7 +39,7 @@ export class mailgun extends CPluginClient<MyPluginConfig> {
       domain = mailgunDefaults!.domain;
       apiKey = mailgunDefaults!.apiKey;
     }
-    this.refPlugin.emitEvent<IMailTemplateRequest<CreateMail>>(null, `send-email-template-${ region }`, {
+    this.emitEvent<IMailTemplateRequest<CreateMail>>(`send-email-template-${ region }`, {
       mail: {
         domain: domain!,
         apiKey: apiKey!,
@@ -60,7 +60,7 @@ export class mailgun extends CPluginClient<MyPluginConfig> {
       domain = mailgunDefaults!.domain;
       apiKey = mailgunDefaults!.apiKey;
     }
-    this.refPlugin.emitEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(null, `send-saved-email-template-${ region }`, {
+    this.emitEvent<IMailTemplateRequest<CreateSMail, MailGunSavedMailRequest<CreateSMail>>>(`send-saved-email-template-${ region }`, {
       mail: {
         templateId,
         domain: domain!,
