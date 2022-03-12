@@ -51,6 +51,7 @@ export class Mailgun {
     const self = this;
     return new Promise((resolve, reject) => {
       let sendMailData = {
+        subject: data.subject,
         from: data.from,
         to: data.to,
         html: data.html,
