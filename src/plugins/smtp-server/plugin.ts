@@ -23,7 +23,7 @@ export type PromiseResolve<TData = any, TReturn = void> = (data: TData) => TRetu
 export class smtpServer extends CPluginClient<ISMTPServerConfig> {
   public readonly _pluginName: string = "smtp-server";
 
-  async onError(listener: (err: any) => void) {
+  async onError(listener: { (err: any): Promise<void>; }) {
     await this.onEvent<any>(ISMTPServerEvents.onError, listener);
   }
   async onAuth(listener: { (request?: ISMTPServerOnAuthRequest): Promise<void>; }) {
@@ -32,13 +32,13 @@ export class smtpServer extends CPluginClient<ISMTPServerConfig> {
   async onConnect(listener: { (request?: ISMTPServerOnRequest): Promise<void>; }) {
     await this.onReturnableEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onConnect, listener);
   }
-  async onClose(listener: (request: ISMTPServerOnRequest) => void) {
+  async onClose(listener: { (request: ISMTPServerOnRequest): Promise<void>; }) {
     await this.onEvent<ISMTPServerOnRequest>(ISMTPServerEvents.onClose, listener);
   }
-  async onEmail(listener: (request: ISMTPServerOnMailRequest) => void) {
+  async onEmail(listener: { (request: ISMTPServerOnMailRequest): Promise<void>; }) {
     await this.onEvent<ISMTPServerOnMailRequest>(ISMTPServerEvents.onEmail, listener);
   }
-  async onEmailSpecific(emailAddress: string, listener: (request: ISMTPServerOnMailRequest) => void) {
+  async onEmailSpecific(emailAddress: string, listener: { (request: ISMTPServerOnMailRequest): Promise<void>; }) {
     await this.onEvent<ISMTPServerOnMailRequest>(getEmailSpecific(emailAddress), listener);
   }
   async onMailFrom(listener: { (request?: ISMTPServerOnMailFromRequest): Promise<void>; }) {
