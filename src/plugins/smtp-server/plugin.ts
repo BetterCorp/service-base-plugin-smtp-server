@@ -53,10 +53,41 @@ export interface ISMTPServerOnRequestSession {
 export interface ISMTPServerOnRequest {
   session: ISMTPServerOnRequestSession;
 }
-export interface ISMTPServerOnMailRequest<bodyType = any> extends ISMTPServerOnRequest {
+export interface ISMTPServerOnMailRequestBody {
+  attachments: Array<{
+    type: string | null,
+    content: any | null,
+    contentType: string | null,
+    partId: string | null,
+    release: string | null,
+    contentDisposition: string | null,
+    filename: string | null,
+    headers: any,
+    checksum: string,
+    size: number;
+  }>,
+  headers: any,
+  headerLines: Array<{
+    key: string,
+    line: string;
+  }>,
+  text: string | null,
+  textAsHtml: string | null,
+  subject: string,
+  date: string,
+  to: {
+    text: string;
+  },
+  from: {
+    text: string;
+  },
+  messageId: string | null,
+  html: boolean;
+}
+export interface ISMTPServerOnMailRequest extends ISMTPServerOnRequest {
   receiver: any;
   sender: any;
-  body: bodyType;
+  body: ISMTPServerOnMailRequestBody;
 }
 export type PromiseResolve<TData = any, TReturn = void> = (data: TData) => TReturn;
 export class smtpServer extends CPluginClient<ISMTPServerConfig> {
