@@ -1,4 +1,6 @@
-export default () => {
+import { ISMTPServerConfig } from './config';
+
+export default (): ISMTPServerConfig => {
   return {
     port: 25,
     serverOptions: {},
@@ -11,8 +13,9 @@ export default () => {
       onClose: false,
       onMailFrom: false,
       onRcptTo: false,
-      onData: false,
-      onError: false
+      onError: false,
+      onEmail: false,
+      onEmailSpecific: false
     }
   };
 };

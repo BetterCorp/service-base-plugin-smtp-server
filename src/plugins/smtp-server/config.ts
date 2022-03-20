@@ -10,7 +10,7 @@ export interface ISMTPServerEventsConfig {
 }
 export interface ISMTPServerConfig {
   port: number;
-  banner: string;
+  banner: string | null;
   domains: Array<string>;
   serverOptions: any;
   events: ISMTPServerEventsConfig;

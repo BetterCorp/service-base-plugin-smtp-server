@@ -48,14 +48,15 @@ export interface ISMTPServerOnRequestSession {
   transaction: number;
   envelope: ISMTPServerOnRequestSessionEnvelope;
   user?: any;
+  _quiet?: boolean;
 }
 export interface ISMTPServerOnRequest {
   session: ISMTPServerOnRequestSession;
 }
-export interface ISMTPServerOnMailRequest {
+export interface ISMTPServerOnMailRequest<bodyType = any> extends ISMTPServerOnRequest {
   receiver: any;
   sender: any;
-  body: any;
+  body: bodyType;
 }
 export type PromiseResolve<TData = any, TReturn = void> = (data: TData) => TReturn;
 export class smtpServer extends CPluginClient<ISMTPServerConfig> {
@@ -189,17 +190,23 @@ export class Plugin extends CPlugin<ISMTPServerConfig> {
               return self.log.info(`Received SMTP request from ${ session.remoteAddress } {BODY} - TOO LARGE, NO PASS`);
             }
             simpleParser(x)
-              .then((parsed: any) => {
-                self.emitEvent(null, ISMTPServerEvents.onEmail, {
-                  receiver: session._receiver.address,
-                  sender: session._sender.address,
-                  body: parsed
-                });
-                self.emitEvent(null, getEmailSpecific(session._receiver.address), {
-                  receiver: session._receiver.address,
-                  sender: session._sender.address,
-                  body: parsed
-                });
+              .then(async (parsed: any) => {
+                if ((await self.getPluginConfig()).events.onEmail === true)
+                  self.emitEvent(null, ISMTPServerEvents.onEmail, {
+                    receiver: session._receiver.address,
+                    sender: session._sender.address,
+                    body: parsed,
+                    session: session
+                  });
+
+                if ((await self.getPluginConfig()).events.onEmailSpecific === true)
+                  self.emitEvent(null, getEmailSpecific(session._receiver.address), {
+                    receiver: session._receiver.address,
+                    sender: session._sender.address,
+                    body: parsed,
+                    session: session
+                  });
+
                 self.log.info(`Received SMTP request from ${ session.remoteAddress } {SUBJECT} - ${ parsed.subject }`);
                 self.log.info(`Received SMTP request from ${ session.remoteAddress } {BODY} - COMPLETED (emit: smtp-email-in, smtp-email-in-${ session._receiver.address })`);
                 self.log.debug({
