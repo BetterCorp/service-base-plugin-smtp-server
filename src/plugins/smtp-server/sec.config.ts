@@ -1,4 +1,21 @@
-import { ISMTPServerConfig } from './config';
+export interface ISMTPServerEventsConfig {
+  onAuth: Boolean;
+  onConnect: Boolean;
+  onClose: Boolean;
+  onMailFrom: Boolean;
+  onRcptTo: Boolean;
+  onError: Boolean;
+  onEmail: Boolean;
+  onEmailSpecific: Boolean;
+}
+export interface ISMTPServerConfig {
+  port: number;
+  banner: string | null;
+  domains: Array<string>;
+  serverOptions: any;
+  events: ISMTPServerEventsConfig;
+  spfOptions: any;
+}
 
 export default (): ISMTPServerConfig => {
   return {
@@ -15,7 +32,7 @@ export default (): ISMTPServerConfig => {
       onRcptTo: false,
       onError: false,
       onEmail: false,
-      onEmailSpecific: false
-    }
+      onEmailSpecific: false,
+    },
   };
 };
