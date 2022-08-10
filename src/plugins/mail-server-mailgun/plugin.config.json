@@ -1,0 +1,6 @@
+{
+  "key": "mail-server-mailgun",
+  "name": "Mailgun",
+  "icon": "mailgun.png",
+  "description": "Mailgun mail sending plugin"
+}

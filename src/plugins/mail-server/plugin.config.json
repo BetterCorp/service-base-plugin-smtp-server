@@ -1,0 +1,6 @@
+{
+  "key": "mail-server",
+  "name": "NodeMailer",
+  "icon": "nodemailer.png",
+  "description": "NodeMailer mail sending plugin"
+}

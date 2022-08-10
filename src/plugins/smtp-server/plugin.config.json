@@ -1,0 +1,6 @@
+{
+  "key": "smtp-server",
+  "name": "SMTP Server",
+  "icon": "smtp.png",
+  "description": "SMTP Server plugin"
+}
